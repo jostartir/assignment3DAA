@@ -8,7 +8,6 @@ Group:SE-2519
 
 Maze size (rows x columns): 8 x 8
 
-This file is the report. Fill it in as you go. How to start: `START_HERE.md`. The task: `docs/Assignment3.pdf`.
 
 ## Program output
 
