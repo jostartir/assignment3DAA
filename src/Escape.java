@@ -16,7 +16,65 @@ public class Escape {
     public record Result(int[] path, int visited, int deadEnds) {}
 
     public static Result escape(Input.Walls w, int[] broken) {
-        // TODO
-        return new Result(new int[0], 0, 0);
+        int n = w.cells();
+        int[][] neighbours = Graphs.open(w,broken);
+
+        int deadEnds = 0;
+        for (int cell = 0;cell < n; cell++){
+            if (neighbours[cell].length == 1){
+                deadEnds++;
+            }
+        }
+
+        boolean[] visited = new boolean[n];
+        int[] stack = new int[n];
+        int top = 0;
+        stack[top] = 0;
+        visited[0] = true;
+        int visitedCount = 1;
+        int[] rowStep = {-1,0,1,0};
+        int[] colStep = {0,1,0,-1};
+
+
+
+        while (top >= 0 && stack[top] != n-1){
+            int cell = stack[top];
+            boolean moved = false;
+            for (int direction = 0; direction < 4; direction++){
+                int row = cell / w.cols() + rowStep[direction];
+                int col = cell % w.cols() + colStep[direction];
+
+                if (row < 0 || row >= w.rows() || col < 0 || col >= w.cols()){
+                    continue;
+                }
+
+                int next = row * w.cols() + col;
+                if (visited[next] || !canWalk(neighbours,cell,next)){
+                    continue;
+                }
+                top++;
+                stack[top] = next;
+                visited[next] = true;
+                visitedCount++;
+                moved = true;
+                break;
+            }
+            if (!moved) {
+                top--;
+            }
+        }
+
+        int[] path = java.util.Arrays.copyOf(stack, top + 1);
+        return new Result(path, visitedCount, deadEnds);
+    }
+
+    private static boolean canWalk(int[][] neighbours, int from, int to) {
+        for (int neighbour : neighbours[from]) {
+            if (neighbour == to) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
