@@ -19,8 +19,73 @@ public class Zones {
      * Is DAG in Main is 1 when the number of zones equals the number of cells (no cycle), so you do not need a separate check.
      */
     public static int[] kosaraju(Input.Slides s) {
-        // TODO
-        return new int[s.n()];
+        int n = s.n();
+        boolean[] visited = new boolean[n];
+        int[] order = new int[n];
+
+        int orderCount = 0;
+        int[] stack = new int[n];
+        int[] nextSlide = new int[n];
+
+        int[][] outgoing = Graphs.slidesFrom(s);
+        int[][] incoming = Graphs.slidesInto(s);
+
+        for (int start = 0; start < n;start++){
+            if (visited[start]){
+                continue;
+
+            }
+            int top = 0;
+            stack[top] = start;
+            visited[start] = true;
+            while (top >= 0){
+                int cell = stack[top];
+                if (nextSlide[cell] < outgoing[cell].length){
+                    int slide = outgoing[cell][nextSlide[cell]];
+                    nextSlide[cell]++;
+                    int next = s.to()[slide];
+                    if (!visited[next]){
+                        visited[next] = true;
+                        top++;
+                        stack[top] = next;
+                    }
+                }else{
+                    order[orderCount] = cell;
+                    orderCount++;
+                    top--;
+                }
+            }
+        }
+        int[] zoneOf = new int[n];
+        java.util.Arrays.fill(zoneOf,-1);
+        int zoneCount = 0;
+
+        for (int i = orderCount - 1; i >= 0; i--){
+            int start = order[i];
+            if (zoneOf[start] != -1){
+                continue;
+            }
+            int top = 0;
+            stack[top] = start;
+            zoneOf[start] = zoneCount;
+            while (top >= 0){
+                int cell = stack[top];
+                top--;
+                for (int j = 0; j < incoming[cell].length; j++) {
+                    int slide = incoming[cell][j];
+                    int next = s.from()[slide];
+                    if (zoneOf[next] == -1){
+                        zoneOf[next] = zoneCount;
+                        top++;
+                        stack[top] = next;
+                    }
+
+
+                }
+            }
+            zoneCount++;
+        }
+        return zoneOf;
     }
 
     /**
@@ -30,7 +95,6 @@ public class Zones {
      * [1] the cost of the cheapest route from the zone of cell 0 to the zone of the last cell.
      */
     public static long[] routes(Input.Slides s, int[] zoneOf, int zoneCount) {
-        // TODO
         return new long[]{0, 0};
     }
 }
