@@ -95,6 +95,58 @@ public class Zones {
      * [1] the cost of the cheapest route from the zone of cell 0 to the zone of the last cell.
      */
     public static long[] routes(Input.Slides s, int[] zoneOf, int zoneCount) {
-        return new long[]{0, 0};
+        long[] cost = new long[zoneCount];
+        int[] stages = new int[zoneCount];
+
+        java.util.Arrays.fill(cost,Long.MAX_VALUE);
+        java.util.Arrays.fill(stages,1);
+        cost[zoneOf[0]] = 0;
+        int[] degree = new int[zoneCount];
+
+        for (int i = 0; i < s.count(); i++){
+            int from = zoneOf[s.from()[i]];
+            int to = zoneOf[s.to()[i]];
+            if (from != to){
+                degree[from]++;
+            }
+
+        }
+        int[][] zoneSlides = new int[zoneCount][];
+        for (int z = 0; z < zoneCount; z++){
+            zoneSlides[z] = new int[degree[z]];
+        }
+        int[] filled = new int[zoneCount];
+
+        for (int i = 0; i < s.count(); i++) {
+            int from = zoneOf[s.from()[i]];
+            int to = zoneOf[s.to()[i]];
+            if (from != to){
+                zoneSlides[from][filled[from]] = i;
+                filled[from]++;
+            }
+        }
+
+        for (int z = 0; z < zoneCount; z++ ){
+            for (int j = 0; j < zoneSlides[z].length; j++){
+                int slide = zoneSlides[z][j];
+                int to = zoneOf[s.to()[slide]];
+                if (stages[z] + 1 > stages[to]){
+                    stages[to] = stages[z] +1;
+                }
+                if (cost[z] != Long.MAX_VALUE){
+                    long candidate = cost[z] + s.time()[slide];
+                    if (candidate < cost[to]){
+                        cost[to] = candidate;
+                    }
+                }
+            }
+        }
+        int flowStages = 0;
+        for (int z = 0; z < zoneCount; z++){
+            if (stages[z] > flowStages){
+                flowStages = stages[z];
+            }
+        }
+        return new long[]{flowStages, cost[zoneOf[s.n() - 1]]};
     }
 }
